@@ -30,7 +30,7 @@ const client = new NomaClient(NOMA_API_URL, NOMA_API_KEY, NOMA_PROJECT_ID);
 
 const server = new McpServer({
   name: "nomacms",
-  version: "1.0.0",
+  version: "1.0.2",
 });
 
 // ── Register resources and tools ────────────────────────────────────
