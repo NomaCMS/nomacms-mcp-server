@@ -70,7 +70,7 @@ Removing locales is intentionally **not** exposed here (use **Project settings**
 - `bulk_delete_entries` — Delete multiple entries atomically by UUID
 - `link_entry_translation` — Link two entries (different locales) into the same translation group (`POST …/link-translation`; requires **update** ability)
 
-**Content API shape:** Each entry has `uuid`, `locale`, `published_at`, and **`fields`** (custom field values). Richtext values are **markdown strings** on write; on read they are either raw markdown or rendered HTML depending on the field’s `editor.outputFormat` (`markdown` vs `html`). `get_entry` supports `translation_locale`, `exclude`, `timestamps`, and `state` query parameters.
+**Content API shape:** Each entry has `uuid`, `locale`, `published_at`, and **`fields`** (custom field values). Richtext values are **markdown strings** on write; on read they are either raw markdown or rendered HTML depending on the field’s `editor.outputFormat` (`markdown` vs `html`). **Relation fields** return nested entry objects (or arrays for one-to-many) on read; on write send only the related entry’s **UUID** or **numeric id** (never the full nested object from a previous `get_entry`). `get_entry` supports `translation_locale`, `exclude`, `timestamps`, and `state` query parameters.
 
 **Asset URLs:** The API returns `url`, `thumbnail_url`, and `original_url` as stable links (optional `?variant=thumbnail` or `?variant=original`).
 

@@ -97,10 +97,14 @@ File selector from the asset library.
 Links to entries in another collection.
 - **Repeatable**: No
 - **Options**: \`{ hideInContentList: boolean, hiddenInAPI: boolean, relation: { collection: number | null, type: number }, includeDraft: boolean }\`
-  - \`relation.collection\`: The internal ID of the target collection
+  - \`relation.collection\`: Target collection — stored as numeric id; on create/update you may pass id, slug, or name (API normalizes to an id when it resolves in the project)
   - \`relation.type\`: 1 = One to One, 2 = One to Many
   - \`includeDraft\`: If true, draft entries are included in the relation picker
 - **Validations**: required
+- **Values in the Content API**:
+  - **Read** (\`get_entry\` / \`list_entries\`): one-to-one → \`null\` or a **nested entry** (same shape as a top-level entry: \`uuid\`, \`locale\`, \`fields\`, …). One-to-many → \`null\` or an **array** of those objects (order preserved).
+  - **Write** (\`create_entry\`, \`update_entry\`, \`patch_entry\`, bulk): send only **UUID strings** and/or **numeric entry ids** — one scalar for one-to-one, an array for one-to-many. Invalid or out-of-collection references return **422**.
+  - **Do not** round-trip the nested object from a read into \`data\`; use \`related.uuid\` (or id) only.
 
 ### 15. json
 Raw JSON data input.
@@ -300,7 +304,7 @@ All conditions inside the \`or\` array are combined with OR logic:
 \`\`\`
 
 #### Relation filtering
-Filter entries based on related entry fields:
+The **outer** key (\`author\`, \`category\`, …) is the **relation field name** on the collection you are listing. Each **inner** key must be a **custom field name on the related entry** (not a display label). Example: \`author\` → related collection has a field \`name\` → use \`{ "author": { "name": { "eq": "John" } } }\`. If that field were \`full-name\`, use \`full-name\` instead of \`name\`. Shorthand equality without \`eq\` works for simple cases:
 \`\`\`json
 {
   "where": {

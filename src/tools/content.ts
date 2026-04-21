@@ -2,6 +2,12 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { NomaClient } from "../client.js";
 
+/** Appended to `data` payload docs — must match Content API (UUID/id only on write). */
+const DATA_RELATION_AND_MEDIA_HINT =
+  " Relation fields: on write send the related entry's UUID string or numeric id only; one-to-one = one value, one-to-many = array of UUIDs/ids. " +
+  "Do not pass the nested entry object from get_entry/list_entries. " +
+  "Media fields: asset UUID strings and/or numeric asset ids (array when multiple).";
+
 export function registerContentTools(
   server: McpServer,
   client: NomaClient
@@ -22,7 +28,7 @@ export function registerContentTools(
           "Simple: { \"state\": \"published\" }. " +
           "With operators: { \"price\": { \"lt\": 50 }, \"title\": { \"like\": \"news\" } }. " +
           "OR group: { \"or\": [{ \"tags\": \"clearance\" }, { \"campaign\": { \"name\": \"Summer\" } }] }. " +
-          "Relation filter: { \"author\": { \"name\": { \"eq\": \"John\" } } }. " +
+          "Relation filter: outer key = relation field on this collection; inner keys = field names on the related entry, e.g. { \"author\": { \"name\": { \"eq\": \"John\" } } }. " +
           "Core columns (id, uuid, locale, state, created_at, updated_at, published_at) can be filtered directly."
         ),
       locale: z
@@ -93,7 +99,8 @@ export function registerContentTools(
   server.registerTool("get_entry", {
     title: "Get Entry",
     description:
-      "Get a single content entry by UUID. Response includes uuid, locale, published_at, and a `fields` object (custom field values — not a nested `data` key).",
+      "Get a single content entry by UUID. Response includes uuid, locale, published_at, and a `fields` object (custom field values — not a nested `data` key). " +
+      "Relation fields appear as nested entry objects (one-to-one) or arrays of entries (one-to-many), not as bare UUIDs.",
     inputSchema: {
       collection_slug: z.string().describe("The collection slug"),
       uuid: z.string().describe("The entry UUID"),
@@ -140,7 +147,9 @@ export function registerContentTools(
       data: z
         .record(z.string(), z.unknown())
         .describe(
-          "Object where keys are field names and values are the content (e.g. { title: 'My Post', slug: 'my-post' }). Richtext fields: use a markdown string, not Lexical/HTML objects."
+          "Object where keys are field names and values are the content (e.g. { title: 'My Post', slug: 'my-post' }). " +
+            "Richtext fields: use a markdown string, not Lexical/HTML objects." +
+            DATA_RELATION_AND_MEDIA_HINT
         ),
       state: z
         .string()
@@ -176,7 +185,10 @@ export function registerContentTools(
       uuid: z.string().describe("The entry UUID"),
       data: z
         .record(z.string(), z.unknown())
-        .describe("Object with field names and their new values; richtext fields are markdown strings"),
+        .describe(
+          "Object with field names and their new values; richtext fields are markdown strings." +
+            DATA_RELATION_AND_MEDIA_HINT
+        ),
       locale: z.string().optional().describe("Locale code"),
     },
   }, async ({ collection_slug, uuid, data, locale }) => {
@@ -202,7 +214,8 @@ export function registerContentTools(
       data: z
         .record(z.string(), z.unknown())
         .describe(
-          "Fields to merge; omit unchanged fields. Richtext values are markdown strings."
+          "Fields to merge; omit unchanged fields. Richtext values are markdown strings." +
+            DATA_RELATION_AND_MEDIA_HINT
         ),
       locale: z.string().optional().describe("Locale code"),
     },
@@ -304,7 +317,10 @@ export function registerContentTools(
           z.object({
             data: z
               .record(z.string(), z.unknown())
-              .describe("Entry field payload; richtext values are markdown strings"),
+              .describe(
+                "Entry field payload; richtext values are markdown strings." +
+                  DATA_RELATION_AND_MEDIA_HINT
+              ),
             locale: z.string().optional().describe("Locale code (e.g. 'en')"),
             state: z
               .string()
@@ -336,7 +352,10 @@ export function registerContentTools(
             uuid: z.string().describe("Entry UUID"),
             data: z
               .record(z.string(), z.unknown())
-              .describe("Entry field payload; richtext values are markdown strings"),
+              .describe(
+                "Entry field payload; richtext values are markdown strings." +
+                  DATA_RELATION_AND_MEDIA_HINT
+              ),
             locale: z.string().optional().describe("Locale code"),
           })
         )

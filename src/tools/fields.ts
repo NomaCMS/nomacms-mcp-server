@@ -29,7 +29,8 @@ export function registerFieldTools(
         .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Field-specific options (e.g. { repeatable: true } for group fields). For richtext: { editor: { type: 1, outputFormat: 'html' | 'markdown' } }"
+          "Field-specific options (e.g. { repeatable: true } for group fields). For richtext: { editor: { type: 1, outputFormat: 'html' | 'markdown' } }. " +
+            "For relation: { relation: { collection: <target collection id, slug, or name>, type: 1 | 2 }, includeDraft?: boolean } (1 = one-to-one, 2 = one-to-many)."
         ),
       validations: z
         .record(z.string(), z.unknown())
@@ -70,7 +71,8 @@ export function registerFieldTools(
         .record(z.string(), z.unknown())
         .optional()
         .describe(
-          "Field-specific options. For richtext: { editor: { type: 1, outputFormat: 'html' | 'markdown' } }"
+          "Field-specific options. For richtext: { editor: { type: 1, outputFormat: 'html' | 'markdown' } }. " +
+            "For relation: { relation: { collection, type: 1 | 2 }, includeDraft?: boolean }."
         ),
       validations: z
         .record(z.string(), z.unknown())
