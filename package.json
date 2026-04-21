@@ -1,6 +1,6 @@
 {
   "name": "@nomacms/mcp-server",
-  "version": "1.0.2",
+  "version": "1.2.0",
   "description": "MCP server for NomaCMS. Manage collections, fields, content, and assets via AI agents. https://nomacms.com",
   "type": "module",
   "main": "dist/index.js",
