@@ -1,11 +1,11 @@
-# Noma MCP Server
+# NomaCMS MCP Server
 
-An MCP (Model Context Protocol) server that connects AI agents like [Cursor](https://cursor.com) and [Claude Code](https://claude.com/product/claude-code) to your Noma project. Manage collections, fields, content entries, assets, and webhooks programmatically through natural language.
+An MCP (Model Context Protocol) server that connects AI agents like [Cursor](https://cursor.com) and [Claude Code](https://claude.com/product/claude-code) to your NomaCMS project. Manage collections, fields, content entries, assets, and webhooks programmatically through natural language.
 
 ## Configuration
 
 - `NOMA_API_KEY`: API key from **User settings → API keys** — see [API key abilities](#api-key-abilities).
-- `NOMA_PROJECT_ID`: Your project’s UUID — you can find it on the project home page or under **Project settings → API Access**
+- `NOMA_PROJECT_ID`: Your project's UUID — you can find it on the project home page or under **Project settings → API Access**
 
 ## Usage with Cursor
 
@@ -37,14 +37,14 @@ claude mcp add nomacms \
   -- npx -y @nomacms/mcp-server
 ```
 
-## Available Tools (33)
+## Available Tools (39)
 
 ### Project
 - `get_project` — Get project information (`default_locale`, `locales`, etc.)
 - `add_project_locale` — Add a locale code to the project (requires **admin**)
 - `set_default_project_locale` — Set the default locale (requires **admin**)
 
-Removing locales is intentionally **not** exposed here (use **Project settings** → **Localization** in the Noma dashboard if you must remove a locale).
+Removing locales is intentionally **not** exposed here (use **Project settings** → **Localization** in the NomaCMS dashboard if you must remove a locale).
 
 ### Collections
 - `list_collections` — List all collections
@@ -64,11 +64,17 @@ Removing locales is intentionally **not** exposed here (use **Project settings**
 - `create_entry` — Create a content entry
 - `update_entry` — Update a content entry
 - `patch_entry` — Partially update an entry (HTTP PATCH; merge only the fields you send)
+- `publish_entry` — Publish the draft as a new immutable version (**update**)
+- `unpublish_entry` — Clear the live published pointer; versions retained (**update**)
 - `delete_entry` — Soft-delete a content entry (moves to trash)
 - `bulk_create_entries` — Create multiple entries atomically
 - `bulk_update_entries` — Update multiple entries atomically by UUID
 - `bulk_delete_entries` — Delete multiple entries atomically by UUID
 - `link_entry_translation` — Link two entries (different locales) into the same translation group (`POST …/link-translation`; requires **update** ability)
+- `list_entry_versions` — List version history for an entry
+- `get_entry_version` — Fetch one version by number (includes snapshot payload)
+- `revert_entry_version` — Restore draft from a prior snapshot and publish (**update**)
+- `update_entry_version_label` — Edit label/description on a version; snapshot unchanged (**update**)
 
 **Content API shape:** Each entry has `uuid`, `locale`, `published_at`, and **`fields`** (custom field values). Richtext values are **markdown strings** on write; on read they are either raw markdown or rendered HTML depending on the field’s `editor.outputFormat` (`markdown` vs `html`). **Relation fields** return nested entry objects (or arrays for one-to-many) on read; on write send only the related entry’s **UUID** or **numeric id** (never the full nested object from a previous `get_entry`). `get_entry` supports `translation_locale`, `exclude`, `timestamps`, and `state` query parameters.
 
@@ -110,11 +116,11 @@ Your API key needs the appropriate abilities for the tools you want to use:
 | `delete` | delete entries, delete assets, delete webhooks               |
 | `admin`  | create/update/reorder collections and fields; add/set default **project locales** (MCP does not expose locale removal) |
 
-Create the key in the Noma dashboard under **User settings → API keys**. Copy the **Project ID** from the project home page or **Project settings → API Access** when you configure this server.
+Create the key in the NomaCMS dashboard under **User settings → API keys**. Copy the **Project ID** from the project home page or **Project settings → API Access** when you configure this server.
 
 ## Using Multiple Projects
 
-Each MCP entry connects to a single Noma project. To work with multiple projects, add separate entries in your MCP config:
+Each MCP entry connects to a single NomaCMS project. To work with multiple projects, add separate entries in your MCP config:
 
 ```json
 {
